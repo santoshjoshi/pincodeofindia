@@ -1,0 +1,147 @@
+extend layout
+block content
+  script
+      $(function() {
+          var states = [
+                {value:"11111",label:"Arunachal Pradesh"},
+                {value:"11110",label:"Chandigarh"},
+                {value:"11",label:"Jammu And Kashmir"},
+                {value:"12",label:"Gujrat"},
+                {value:"13",label:"Jharkhand"},
+                {value:"14",label:"Karnataka"},
+                {value:"15",label:"Haryana"},
+                {value:"16",label:"Himachal Pradesh"},
+                {value:"17",label:"Delhi"},
+                {value:"18",label:"Goa"},
+                {value:"19",label:"Lakshadweep"},
+                {value:"20",label:"Maharashtra"},
+                {value:"21",label:"Kerala"},
+                {value:"22",label:"Madhya Pradesh"},
+                {value:"23",label:"Meghalaya"},
+                {value:"24",label:"Mizoram"},
+                {value:"25",label:"Nagaland"},
+                {value:"26",label:"Orissa"},
+                {value:"27",label:"Manipur"},
+                {value:"28",label:"Rajasthan"},
+                {value:"29",label:"Tamilnadu"},
+                {value:"3",label:"Assam"},
+                {value:"30",label:"Tripura"},
+                {value:"31",label:"Pondicherry"},
+                {value:"32",label:"Sikkim"},
+                {value:"33",label:"West Bengal"},
+                {value:"34",label:"Punjab"},
+                {value:"35",label:"Uttar Pradesh"},
+                {value:"37",label:"Uttarakhand"},
+                {value:"4",label:"Dadra and Nagar Haveli"},
+                {value:"6",label:"Andhra Pradesh"},
+                {value:"7",label:"Bihar"},
+                {value:"8",label:"Daman and Diu"},
+                {value:"9",label:"Chhattisgarh"}
+          ];
+          $( "#state" ).autocomplete({
+               source: function( request, response ) {
+                var matcher = new RegExp(   request.term  , "i" );
+                response( $.grep( states, function( value ) {
+                    value = value.label || value.value || value;
+                    return matcher.test( value ) ;
+                }));
+            },
+            select: function( event, ui ) {
+                     this.value.label;
+                     return false;
+            },
+            focus: function( event, ui ) {
+                $( "#state" ).val( ui.item.label );
+                $( "#stateId" ).val( ui.item.value );
+                return false;
+            },
+          });
+          $( "#area" ).autocomplete({
+            source: function( request, response ) {
+              $.ajax({
+              url: "/getPinCode/"+$("input#stateId").val()+"/"+$("input#districtId").val()+"/"+request.term,
+              dataType: "json",
+              cache:"true",
+              success: function( data ) {
+                    response( $.map( data, function( item ) {
+                          return {
+                            label: item[0]+ "  " + item[1],
+                            value: item[1].substring(0,item[1].length-1)
+                          }
+                    }));
+                  }
+                });
+            },
+            minLength: 4,
+            select: function( event, ui ) {
+                   $( "#area" ).val(ui.item.label);
+                     return false;
+            },
+            focus: function( event, ui ) {
+                $( "#area" ).val( ui.item[0] );
+                return false;
+            },
+            open: function() {
+              $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+            },
+            close: function() {
+              $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+            }
+          });
+
+          $( "#district" ).autocomplete({
+            source: function( request, response ) {
+              $.ajax({
+              url: "/getDistricts/"+$("input#stateId").val()+"/"+request.term,
+              dataType: "json",
+              cache:"true",
+              success: function( data ) {
+                    response( $.map( data, function( item ) {
+                          return {
+                            label: item[0],
+                            value: item[1]
+                          }
+                    }));
+                  }
+                });
+            },
+            minLength: 3,
+            select: function( event, ui ) {
+                    $( "#district" ).val(ui.item.label);
+                    $( "#districtId" ).val( ui.item.value );
+                     return false;
+            },
+            focus: function( event, ui ) {
+                //$( "#district" ).val( ui.item[0] );
+                //$( "#districtId" ).val( ui.item[1] );
+                return false;
+            },
+            open: function() {
+              $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+            },
+            close: function() {
+              $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+            }
+          });
+      });
+  div#container
+    | Pin Code of India
+  div
+    | <fb:login-button show-faces="true" width="400" max-rows="1"></fb:login-button>
+    form
+      table.getPinCode
+        tr.c0
+          td.stateslink State
+          td.stateslink 
+            input(type='text', name='state', id='state', value="")
+            input(type='hidden', name='stateId', id='stateId', value="")
+        tr.c1
+          td.stateslink District
+          td.stateslink 
+            input(type='hidden', name='districtId', id='districtId', value="")
+            input(type='text', name='district', id='district', value="")
+        tr.c0
+          td.stateslink Area
+          td.stateslink 
+            input(type='text', name='area', id='area', value="")	    		
+
